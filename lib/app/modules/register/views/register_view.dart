@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/controllers/auth_controller.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';
 
 class RegisterView extends StatelessWidget {
+  final AuthController authController = Get.put(AuthController()); // Inisialisasi AuthController
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,28 +17,24 @@ class RegisterView extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // Navigasi ke halaman sebelumnya
             Get.back();
           },
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: Padding(
+      body: SingleChildScrollView( // Menambahkan SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start, // Memastikan elemen di atas
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            // Menggunakan Transform untuk menggeser logo ke atas
             Transform.translate(
-              offset: Offset(0, -30), // Menggeser logo ke atas sebesar 30 px
+              offset: Offset(0, -30),
               child: Image.asset('assets/Logo.png', height: 180),
             ),
-
-            // Menggunakan Transform untuk menggeser teks "Register"
             Transform.translate(
-              offset: Offset(0, -40), // Menggeser teks "Register" ke atas (ubah nilai Y sesuai kebutuhan)
+              offset: Offset(0, -40),
               child: const Text(
                 'Register',
                 style: TextStyle(
@@ -40,34 +43,23 @@ class RegisterView extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 0),
-
-            // Menggunakan Transform untuk menggeser semua TextField dan tombol
             Transform.translate(
-              offset: Offset(0, -20), // Menggeser ke atas sebesar 30 px
+              offset: Offset(0, -20),
               child: Column(
                 children: [
-                  // Input Username
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  // Menghapus TextField untuk username
                   const SizedBox(height: 10),
-
-                  // Input Email
                   TextField(
+                    controller: emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Input Password
                   TextField(
+                    controller: passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(),
@@ -75,9 +67,8 @@ class RegisterView extends StatelessWidget {
                     obscureText: true,
                   ),
                   const SizedBox(height: 10),
-
-                  // Input Confirm Password
                   TextField(
+                    controller: confirmPasswordController,
                     decoration: InputDecoration(
                       labelText: 'Confirm password',
                       border: OutlineInputBorder(),
@@ -85,8 +76,6 @@ class RegisterView extends StatelessWidget {
                     obscureText: true,
                   ),
                   const SizedBox(height: 20),
-
-                  // Tombol Konfirmasi
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF8B4513),
@@ -95,9 +84,14 @@ class RegisterView extends StatelessWidget {
                           vertical: 15.0, horizontal: 80.0),
                       textStyle: const TextStyle(fontSize: 16),
                     ),
-                    onPressed: () {
-                      // Navigasi ke halaman baru setelah klik "Confirm"
-                      Get.to(LoginView()); // Mengarah ke halaman baru
+                    onPressed: () async {
+                      if (passwordController.text == confirmPasswordController.text) {
+                        await authController.registerUser(emailController.text, passwordController.text);
+                        Get.to(LoginView()); // Navigasi setelah berhasil register
+                      } else {
+                        // Tampilkan pesan kesalahan jika password tidak cocok
+                        Get.snackbar("Error", "Password tidak cocok");
+                      }
                     },
                     child: const Text('Confirm'),
                   ),

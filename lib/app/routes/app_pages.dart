@@ -64,6 +64,8 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
+import '../modules/user_profil/bindings/user_profil_binding.dart';
+import '../modules/user_profil/views/user_profil_view.dart';
 import '../modules/welcome/bindings/welcome_binding.dart';
 import '../modules/welcome/views/welcome_view.dart';
 import '../modules/wishlist/bindings/wishlist_binding.dart';
@@ -246,6 +248,11 @@ class AppPages {
       name: _Paths.PESANAN_SUKSES,
       page: () => const PesananSuksesView(),
       binding: PesananSuksesBinding(),
+    ),
+    GetPage(
+      name: _Paths.USER_PROFIL,
+      page: () => const UserProfilView(),
+      binding: UserProfilBinding(),
     ),
   ];
 }
