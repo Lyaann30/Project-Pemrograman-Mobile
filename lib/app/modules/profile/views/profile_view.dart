@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
+import 'package:myapp/app/modules/alamat_saya/views/alamat_saya_view.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/forgot_pw/views/forgot_pw_view.dart';
 import 'package:myapp/app/modules/keranjang/views/keranjang_view.dart';
@@ -142,7 +143,7 @@ class ProfileView extends StatelessWidget {
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     // Navigasi ke halaman Alamat
-                    // Get.to(() => AddressPage());
+                    Get.to(() => AlamatSayaView());
                   },
                 ),
                 Divider(),

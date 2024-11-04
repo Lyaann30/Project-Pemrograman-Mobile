@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/alamat_saya/bindings/alamat_saya_binding.dart';
+import '../modules/alamat_saya/views/alamat_saya_view.dart';
 import '../modules/alamat_tagihan/bindings/alamat_tagihan_binding.dart';
 import '../modules/alamat_tagihan/views/alamat_tagihan_view.dart';
 import '../modules/allbrand/bindings/allbrand_binding.dart';
@@ -253,6 +255,11 @@ class AppPages {
       name: _Paths.USER_PROFIL,
       page: () => UserProfilView(),
       binding: UserProfilBinding(),
+    ),
+    GetPage(
+      name: _Paths.ALAMAT_SAYA,
+      page: () => const AlamatSayaView(),
+      binding: AlamatSayaBinding(),
     ),
   ];
 }

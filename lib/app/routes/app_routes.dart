@@ -38,6 +38,7 @@ abstract class Routes {
   static const ALAMAT_TAGIHAN = _Paths.ALAMAT_TAGIHAN;
   static const PESANAN_SUKSES = _Paths.PESANAN_SUKSES;
   static const USER_PROFIL = _Paths.USER_PROFIL;
+  static const ALAMAT_SAYA = _Paths.ALAMAT_SAYA;
 }
 
 abstract class _Paths {
@@ -77,4 +78,5 @@ abstract class _Paths {
   static const ALAMAT_TAGIHAN = '/alamat-tagihan';
   static const PESANAN_SUKSES = '/pesanan-sukses';
   static const USER_PROFIL = '/user-profil';
+  static const ALAMAT_SAYA = '/alamat-saya';
 }

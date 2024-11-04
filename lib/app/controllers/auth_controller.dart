@@ -10,6 +10,10 @@ class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   RxBool isLoading = false.obs;
+  late Rx<User?> firebaseUser;
+
+  // Menambahkan observable untuk password visibility
+  RxBool isPasswordVisible = false.obs;
 
   Stream<User?> get streamAuthStatus => _auth.authStateChanges();
 
@@ -162,5 +166,27 @@ class AuthController extends GetxController {
       Get.snackbar('Error', 'Gagal memperbarui password: ${e.toString()}',
           backgroundColor: Colors.red);
     }
+  }
+
+  // Method untuk menambahkan atau memperbarui alamat pengguna
+  Future<void> addAddress(String address) async {
+    try {
+      String? userId = firebaseUser.value?.uid;
+      if (userId != null) {
+        await _firestore.collection('users').doc(userId).update({
+          'address': address,
+        });
+        Get.snackbar("Success", "Address updated successfully",
+            backgroundColor: Colors.green, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString(),
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
+
+  // Method untuk toggle visibilitas password
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
-import 'package:myapp/app/modules/forgot_pw/views/forgot_pw_view.dart';
 import 'package:myapp/app/modules/register/views/register_view.dart';
 
 class LoginView extends StatelessWidget {
@@ -26,7 +25,6 @@ class LoginView extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        // Membungkus dengan SingleChildScrollView
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -37,14 +35,12 @@ class LoginView extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    // Menggunakan Transform untuk menggeser logo ke atas
                     Transform.translate(
-                      offset: Offset(0, -40), // Menggeser logo ke atas
+                      offset: Offset(0, -40),
                       child: Image.asset('assets/Logo.png', height: 180),
                     ),
-                    // Menggunakan Transform untuk menggeser teks dan input
                     Transform.translate(
-                      offset: Offset(0, -40), // Menggeser ke atas
+                      offset: Offset(0, -40),
                       child: Column(
                         children: [
                           Text(
@@ -63,28 +59,35 @@ class LoginView extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 10),
-                          // Input password
-                          TextField(
-                            controller: passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              labelText: 'Masukkan password',
-                              border: OutlineInputBorder(),
-                              suffixIcon: Icon(Icons.visibility_off),
-                            ),
-                          ),
+                          // Input password dengan ikon visibility
+                          Obx(() => TextField(
+                                controller: passwordController,
+                                obscureText: !authController.isPasswordVisible
+                                    .value, // Kontrol visibility
+                                decoration: InputDecoration(
+                                  labelText: 'Masukkan password',
+                                  border: OutlineInputBorder(),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      authController.isPasswordVisible.value
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                    ),
+                                    onPressed:
+                                        authController.togglePasswordVisibility,
+                                  ),
+                                ),
+                              )),
                           SizedBox(height: 15),
 
                           // Tombol Login
                           ElevatedButton(
                             onPressed: () async {
-                              // Memanggil fungsi loginUser dari AuthController
                               bool success = await authController.loginUser(
                                 usernameController.text,
                                 passwordController.text,
                               );
 
-                              // Jika login berhasil, navigasi ke AllbrandView
                               if (success) {
                                 Get.to(() => AllbrandView());
                               }
@@ -101,21 +104,6 @@ class LoginView extends StatelessWidget {
                             ),
                           ),
 
-                          // Link Lupa Password
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                // Navigasi ke halaman lupa password
-                                Get.to(() => ForgotPwView());
-                              },
-                              child: Text(
-                                'lupa password?',
-                                style: TextStyle(color: Colors.teal),
-                              ),
-                            ),
-                          ),
-
                           // Link Register Now
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +111,6 @@ class LoginView extends StatelessWidget {
                               Text("Don't have an account? "),
                               TextButton(
                                 onPressed: () {
-                                  // Navigasi ke halaman register
                                   Get.to(() => RegisterView());
                                 },
                                 child: Text(
