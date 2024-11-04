@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';
+import 'package:myapp/app/controllers/auth_controller.dart';
 
 class NewPwView extends StatelessWidget {
+  final AuthController authController = Get.find<AuthController>();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,7 +17,6 @@ class NewPwView extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // Navigasi ke halaman sebelumnya
             Get.back();
           },
         ),
@@ -24,15 +28,12 @@ class NewPwView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo
               Transform.translate(
-                offset: Offset(0, -70), // Menggeser logo ke atas sebesar 40 px
+                offset: Offset(0, -70),
                 child: Image.asset('assets/Logo.png', height: 180),
               ),
-
-              // Teks 'Reset Password'
               Transform.translate(
-                offset: Offset(0, -50), // Menggeser teks ke atas sebesar 20 px
+                offset: Offset(0, -50),
                 child: Text(
                   'Reset Password',
                   style: TextStyle(
@@ -43,51 +44,51 @@ class NewPwView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-
-              // Input Password Baru
               Transform.translate(
-                offset: Offset(0, -10), 
+                offset: Offset(0, -10),
                 child: TextField(
+                  controller: passwordController,
                   decoration: InputDecoration(
                     labelText: 'Masukkan Password Baru',
                     border: OutlineInputBorder(),
                   ),
+                  obscureText: true,
                 ),
               ),
               SizedBox(height: 20),
-
-              // Input Nomor Telepon
               Transform.translate(
-                offset: Offset(0, -10), // Menggeser input nomor telepon ke atas
+                offset: Offset(0, -10),
                 child: TextField(
+                  controller: confirmPasswordController,
                   decoration: InputDecoration(
                     labelText: 'Konfirmasi Password',
                     border: OutlineInputBorder(),
                   ),
+                  obscureText: true,
                 ),
               ),
               SizedBox(height: 40),
-
-              // Tombol Next dan Cancel
               Transform.translate(
-                offset: Offset(0, -20), // Menggeser row tombol ke atas
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.to(LoginView());
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF8B4513), // Warna tombol coklat
-                        padding: EdgeInsets.symmetric(horizontal: 140, vertical: 15),
-                      ),
-                      child: Text(
-                        'Submit',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                    ),
-                  ],
+                offset: Offset(0, -20),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (passwordController.text ==
+                        confirmPasswordController.text) {
+                      authController.updatePassword(passwordController.text);
+                    } else {
+                      Get.snackbar('Error', 'Password tidak sesuai',
+                          backgroundColor: Colors.red);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF8B4513),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 140, vertical: 15),
+                  ),
+                  child: Text(
+                    'Submit',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
             ],

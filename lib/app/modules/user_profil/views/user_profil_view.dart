@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/keranjang/views/keranjang_view.dart';
 import 'package:myapp/app/modules/pencarian/views/pencarian_view.dart';
 import 'package:myapp/app/modules/profile/views/profile_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 import '../controllers/user_profil_controller.dart';
+import 'package:myapp/app/controllers/auth_controller.dart';
 
 class UserProfilView extends GetView<UserProfilController> {
-  const UserProfilView({super.key});
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController birthdateController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final AuthController authController = Get.find<AuthController>();
+
+  UserProfilView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +64,13 @@ class UserProfilView extends GetView<UserProfilController> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
-                _buildProfileInput('Nama', 'Atur Sekarang'),
-                _buildProfileInput('Jenis Kelamin', 'Atur Sekarang'),
-                _buildProfileInput('Tanggal Lahir', 'MM/DD/YYYY'),
-                _buildProfileInput('No. Handphone', 'Atur Sekarang'),
-                _buildProfileInput('Email', 'K**u@gmail.com'),
+                _buildProfileInput('Nama', 'Atur Sekarang', nameController),
+                _buildProfileInput('Jenis Kelamin', 'Atur Sekarang', genderController),
+                _buildProfileInput('Tanggal Lahir', 'MM/DD/YYYY', birthdateController),
+                _buildProfileInput('No. Handphone', 'Atur Sekarang', phoneController),
+                _buildProfileInput('Email', 'K**u@gmail.com', emailController),
                 const SizedBox(height: 20),
-                
+
                 // Tombol Save di bawah TextField Email
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -74,17 +81,16 @@ class UserProfilView extends GetView<UserProfilController> {
                     ),
                   ),
                   onPressed: () {
-                    // Kumpulkan data profil pengguna
                     Map<String, dynamic> userProfileData = {
-                      'Nama': 'userName',  // Ganti dengan nilai input asli
-                      'Jenis Kelamin': 'gender',  // Ganti dengan nilai input asli
-                      'Tanggal Lahir': 'birthdate',  // Ganti dengan nilai input asli
-                      'No. Handphone': 'phone',  // Ganti dengan nilai input asli
-                      'Email': 'email',  // Ganti dengan nilai input asli
+                      'Nama': nameController.text,
+                      'Jenis Kelamin': genderController.text,
+                      'Tanggal Lahir': birthdateController.text,
+                      'No. Handphone': phoneController.text,
+                      'Email': emailController.text,
                     };
 
-                    // Panggil fungsi saveUserProfile
-                    // controller.saveUserProfile(userProfileData);
+                    // Panggil fungsi saveUserProfile dari AuthController
+                    authController.saveUserProfile(userProfileData);
                   },
                   child: const Text(
                     'Save',
@@ -105,19 +111,19 @@ class UserProfilView extends GetView<UserProfilController> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Get.to(AllbrandView());
+              Get.to(() => AllbrandView());
               break;
             case 1:
-              Get.to(PencarianView());
+              Get.to(() => PencarianView());
               break;
             case 2:
-              Get.to(KeranjangView());
+              Get.to(() => KeranjangView());
               break;
             case 3:
-              Get.to(WishlistView());
+              Get.to(() => WishlistView());
               break;
             case 4:
-              Get.to(ProfileView());
+              Get.to(() => ProfileView());
               break;
           }
         },
@@ -147,7 +153,7 @@ class UserProfilView extends GetView<UserProfilController> {
     );
   }
 
-  Widget _buildProfileInput(String label, String hintText) {
+  Widget _buildProfileInput(String label, String hintText, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -159,6 +165,7 @@ class UserProfilView extends GetView<UserProfilController> {
           ),
           const SizedBox(height: 5),
           TextField(
+            controller: controller,
             decoration: InputDecoration(
               hintText: hintText,
               border: OutlineInputBorder(

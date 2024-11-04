@@ -43,78 +43,73 @@ class AuthController extends GetxController {
 
   // Fungsi Login
   Future<bool> loginUser(String email, String password) async {
-  try {
-    // Proses login ke Firebase dengan email dan password
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    // Cek status verifikasi email
-    if (userCredential.user?.emailVerified ?? false) {
-      // Jika email sudah diverifikasi, simpan status login di SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', 'your_token_value');
-
-      Get.snackbar('Success', 'Login successful', backgroundColor: Colors.green);
-
-      // Jika berhasil login, arahkan ke HOME
-      return true; // Menandakan bahwa login berhasil
-    } else {
-      // Jika email belum diverifikasi, beri tahu pengguna
-      Get.snackbar(
-        'Verification Needed',
-        'Please verify your email to log in. A verification email has been sent.',
-        backgroundColor: Colors.orange,
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      // Kirim ulang email verifikasi
-      await userCredential.user?.sendEmailVerification();
+      if (userCredential.user?.emailVerified ?? false) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', 'your_token_value');
 
-      // Logout agar sesi tidak disimpan
-      await _auth.signOut();
+        Get.snackbar('Success', 'Login successful',
+            backgroundColor: Colors.green);
+
+        return true; // Menandakan bahwa login berhasil
+      } else {
+        Get.snackbar(
+          'Verification Needed',
+          'Please verify your email to log in. A verification email has been sent.',
+          backgroundColor: Colors.orange,
+        );
+
+        await userCredential.user?.sendEmailVerification();
+        await _auth.signOut();
+        return false; // Menandakan bahwa login gagal
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        Get.snackbar('Error', 'No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        Get.snackbar('Error', 'Wrong password provided for that user.');
+      } else if (e.code == 'invalid-email') {
+        Get.snackbar('Error', 'The email format is invalid.');
+      } else if (e.code == 'user-disabled') {
+        Get.snackbar('Error', 'This user has been disabled.');
+      } else {
+        Get.snackbar('Error', e.message ?? 'An unknown error occurred.');
+      }
+      return false; // Menandakan bahwa login gagal
+    } catch (e) {
+      Get.snackbar('Error', 'An unexpected error occurred.');
       return false; // Menandakan bahwa login gagal
     }
-  } on FirebaseAuthException catch (e) {
-    // Tangani berbagai jenis kesalahan
-    if (e.code == 'user-not-found') {
-      Get.snackbar('Error', 'No user found for that email.');
-    } else if (e.code == 'wrong-password') {
-      Get.snackbar('Error', 'Wrong password provided for that user.');
-    } else if (e.code == 'invalid-email') {
-      Get.snackbar('Error', 'The email format is invalid.');
-    } else if (e.code == 'user-disabled') {
-      Get.snackbar('Error', 'This user has been disabled.');
-    } else {
-      Get.snackbar('Error', e.message ?? 'An unknown error occurred.');
-    }
-    return false; // Menandakan bahwa login gagal
-  } catch (e) {
-    Get.snackbar('Error', 'An unexpected error occurred.');
-    return false; // Menandakan bahwa login gagal
   }
-}
 
   // Fungsi Logout
   void logout() async {
     await _auth.signOut();
 
-    // Hapus token dari SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
 
-    // Arahkan ke halaman login
     Get.offAllNamed(Routes.LOGIN);
   }
 
   // Fungsi untuk menyimpan/memperbarui data profil pengguna
   Future<void> saveUserProfile(Map<String, dynamic> data) async {
     try {
-      await _firestore
-          .collection('profil')
-          .doc('userId')
-          .set(data, SetOptions(merge: true));
-      Get.snackbar("Sukses", "Profil berhasil disimpan");
+      User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        await _firestore
+            .collection('profil')
+            .doc(currentUser.uid) // Menggunakan UID pengguna saat ini
+            .set(data, SetOptions(merge: true));
+        Get.snackbar("Sukses", "Profil berhasil disimpan");
+      } else {
+        Get.snackbar("Error", "Pengguna tidak ditemukan. Silakan login kembali.");
+      }
     } catch (e) {
       Get.snackbar("Error", "Gagal menyimpan profil: $e");
     }
@@ -123,12 +118,49 @@ class AuthController extends GetxController {
   // Fungsi untuk mengambil data profil pengguna
   Future<Map<String, dynamic>?> getUserProfile() async {
     try {
-      DocumentSnapshot snapshot =
-          await _firestore.collection('profil').doc('userId').get();
-      return snapshot.data() as Map<String, dynamic>?;
+      User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        DocumentSnapshot snapshot =
+            await _firestore.collection('profil').doc(currentUser.uid).get();
+        return snapshot.data() as Map<String, dynamic>?;
+      } else {
+        Get.snackbar("Error", "Pengguna tidak ditemukan. Silakan login kembali.");
+        return null;
+      }
     } catch (e) {
       Get.snackbar("Error", "Gagal mengambil profil: $e");
       return null;
+    }
+  }
+
+  // Fungsi untuk mengirim email reset password
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      Get.snackbar('Success', 'Password reset email sent!',
+          backgroundColor: Colors.green);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send password reset email: $e',
+          backgroundColor: Colors.red);
+    }
+  }
+
+  // Fungsi untuk memperbarui password
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await user.updatePassword(newPassword);
+        Get.snackbar('Success', 'Password berhasil diperbarui!',
+            backgroundColor: Colors.green);
+        Get.offAll(() => LoginView()); // Mengarahkan ke halaman login
+      } else {
+        Get.snackbar('Error', 'User tidak ditemukan. Silakan login kembali.',
+            backgroundColor: Colors.red);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memperbarui password: ${e.toString()}',
+          backgroundColor: Colors.red);
     }
   }
 }
