@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
@@ -15,34 +16,6 @@ import 'package:myapp/app/modules/profile/views/profile_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 
 class HomeHmView extends StatelessWidget {
-  // List Produk
-  final List<Map<String, dynamic>> products = [
-    {
-      'image': 'assets/Handymen 204 Sepatu Formal Kulit.png',
-      'name': 'Handymen 204 Sepatu Formal Kulit',
-      'price': 'Rp. 312.250',
-      'rating': 5.0
-    },
-    {
-      'image': 'assets/Handymen 207 Sepatu Kulit Formal.png',
-      'name': 'Handymen 207 Sepatu Kulit Formal',
-      'price': 'Rp. 450.000',
-      'rating': 4.8
-    },
-    {
-      'image': 'assets/Handymen 971 Sepatu Safety Pendek.png',
-      'name': 'Handymen 971 Sepatu Safety Pendek',
-      'price': 'Rp. 320.500',
-      'rating': 4.9
-    },
-    {
-      'image': 'assets/Handymen CHS 015 Sepatu Kasual Kulit.png',
-      'name': 'Handymen CHS 015 Sepatu Kasual Kulit',
-      'price': 'Rp. 289.900',
-      'rating': 4.7
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,13 +35,12 @@ class HomeHmView extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(
-                right: 16.0), // Menambahkan padding di sebelah kanan
+            padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
               child: Icon(
                 Icons.account_circle,
                 color: Colors.purple,
-                size: 40, // Ukuran ikon lebih besar
+                size: 40,
               ),
             ),
           ),
@@ -109,14 +81,14 @@ class HomeHmView extends StatelessWidget {
               ),
             ),
 
-            // Teks "All Brands" di sebelah kiri
+            // Teks "Brand ForMen" di sebelah kiri
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: Text(
-                  'Brand Handymen',
+                  'Brand ForMen',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -125,7 +97,7 @@ class HomeHmView extends StatelessWidget {
               ),
             ),
 
-            // Brand Logos Section
+             // Brand Logos Section
             Container(
               height: 80,
               child: ListView(
@@ -134,32 +106,51 @@ class HomeHmView extends StatelessWidget {
                   brandLogo('All', 'assets/Logo All Brand.png', logoSize: 20),
                   brandLogo('Hm', 'assets/Logo Brand Hm.png', logoSize: 20),
                   brandLogo('Fm', 'assets/Logo Brand Fm.png', logoSize: 20),
-                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',
-                      logoSize: 20),
+                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',logoSize: 20),
                   brandLogo('Vindys', 'assets/Logo Brand Vs.png', logoSize: 20),
                 ],
               ),
             ),
 
-            // Product Grid Section
+            // Product Grid Section using Firebase Firestore
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: products.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  return productCard(
-                    products[index]['image'],
-                    products[index]['name'],
-                    products[index]['price'],
-                    products[index]['rating'],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('products')
+                    .where('brand', isEqualTo: 'Hm') // Filter berdasarkan merek
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('No products available.'));
+                  }
+
+                  final products = snapshot.data!.docs;
+                  return GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, index) {
+                      final productData = products[index].data() as Map<String, dynamic>;
+                      final imagePath = productData['image_url'] ?? 'assets/placeholder.png';
+                      
+                      return productCard(
+                        imagePath,
+                        productData['name'] ?? 'No Name',
+                        productData['price']?.toDouble() ?? 0.0,
+                        productData['size'] ?? 'N/A',
+                        productData['stock'] ?? 0,
+                      );
+                    },
                   );
                 },
               ),
@@ -170,9 +161,9 @@ class HomeHmView extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
-        backgroundColor: Color(0xFF8B4513), // Warna coklat
-        selectedItemColor: Colors.black54, // Warna item yang dipilih
-        unselectedItemColor: Colors.white, // Warna item yang tidak dipilih
+        backgroundColor: Color(0xFF8B4513),
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.white,
         onTap: (index) {
           // Handle navigation on tap
           switch (index) {
@@ -219,38 +210,54 @@ class HomeHmView extends StatelessWidget {
     );
   }
 
-  // Helper to build product card with dynamic data
-  Widget productCard(
-      String imagePath, String name, String price, double rating) {
+  // Helper to build product card
+  Widget productCard(String imagePath, String name, double price, String size, int stock) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product detail page
+        // Arahkan ke halaman detail produk (sesuaikan dengan rute halaman yang diinginkan)
         if (name == 'Handymen 204 Sepatu Formal Kulit') {
-          Get.to(Brandhm1View());
-        } else if (name == 'Handymen 971 Sepatu Safety Pendek') {
-          Get.to(Brandhm2View());
-        }
+        Get.to(Brandhm1View());
+      } else if (name == 'Handymen 971 Sepatu Safety Pendek') {
+        Get.to(Brandhm2View());
+      }
       },
       child: Card(
-        child: Column(
-          children: [
-            Image.asset(imagePath, height: 100, width: 100),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  imagePath,
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            Text(price),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.star, color: Colors.yellow),
-                Text(rating.toString()),
-              ],
-            ),
-          ],
+              SizedBox(height: 8),
+              Text(
+                name,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Rp. ${price.toStringAsFixed(3)}',
+                style: TextStyle(fontSize: 14, color: Colors.brown),
+              ),
+              Text(
+                'Ukuran: $size',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              Text(
+                'Stok: $stock',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -300,39 +307,38 @@ class HomeHmView extends StatelessWidget {
   }
 
   Widget brandLogo(String brandName, String imagePath, {double logoSize = 30}) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to the corresponding brand page
-        if (brandName == 'Fm') {
-          Get.to(HomeFmView());
-        } else if (brandName == 'Hm') {
-          Get.to(HomeHmView());
-        } else if (brandName == 'Vindys') {
-          Get.to(HomeVdView());
-        } else if (brandName == 'Mr.Show') {
-          Get.to(HomeMsView());
-        } else if (brandName == 'All') {
-          Get.to(AllbrandView());
-        }
-      },
-      child: Center(
-        // Centering the entire brand logo widget
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            alignment: Alignment.center, // Center the logo inside the container
-            decoration: BoxDecoration(
-              shape: BoxShape.circle, // Circular shape
-              border: Border.all(
-                  color: Color(0xFF8B4513), width: 2), // Thinner border
-            ),
-            child: CircleAvatar(
-              backgroundImage: AssetImage(imagePath),
-              radius: logoSize * 1.0, // Ensure logo size
-            ),
+  return GestureDetector(
+    onTap: () {
+      // Navigate to the corresponding brand page
+      if (brandName == 'Fm') {
+        Get.to(HomeFmView());
+      } else if (brandName == 'Hm') {
+        Get.to(HomeHmView());
+      } else if (brandName == 'Vindys') {
+        Get.to(HomeVdView());
+      } else if (brandName == 'Mr.Show') {
+        Get.to(HomeMsView());
+      } else if (brandName == 'All') {
+        Get.to(AllbrandView());
+      }
+    },
+    child: Center(  // Centering the entire brand logo widget
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          alignment: Alignment.center,  // Center the logo inside the container
+          decoration: BoxDecoration(
+            shape: BoxShape.circle, // Circular shape
+            border: Border.all(
+                color: Color(0xFF8B4513), width: 2), // Thinner border
+          ),
+          child: CircleAvatar(
+            backgroundImage: AssetImage(imagePath),
+            radius: logoSize * 1.0, // Ensure logo size
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

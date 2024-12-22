@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/brandfm1/views/brandfm1_view.dart';
@@ -18,33 +19,6 @@ import 'package:myapp/app/modules/profile/views/profile_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 
 class AllbrandView extends StatelessWidget {
-  // List Produk
-  final List<Map<String, dynamic>> products = [
-    {
-      'image': 'assets/Mr.Show 502 Sepatu Formal Kulit.png',
-      'name': 'Mr.Show 502 Sepatu Formal Kulit',
-      'price': 'Rp. 384.400',
-      'rating': 5.0
-    },
-    {
-      'image': 'assets/ForMen AF 104 Sepatu Loafers Kulit.png',
-      'name': 'ForMen AF 104 Sepatu Loafers Kulit',
-      'price': 'Rp. 450.000',
-      'rating': 4.8
-    },
-    {
-      'image': 'assets/Handymen 971 Sepatu Safety Pendek.png',
-      'name': 'Handymen 971 Sepatu Safety Pendek',
-      'price': 'Rp. 320.500',
-      'rating': 4.9
-    },
-    {
-      'image': 'assets/Vindys Lawender 503 Mid Heels Formal Shoes.png',
-      'name': 'Vindys Lawender 503 Sepatu Mid Heels',
-      'price': 'Rp. 289.900',
-      'rating': 4.7
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -137,32 +111,48 @@ class AllbrandView extends StatelessWidget {
                   brandLogo('All', 'assets/Logo All Brand.png', logoSize: 20),
                   brandLogo('Hm', 'assets/Logo Brand Hm.png', logoSize: 20),
                   brandLogo('Fm', 'assets/Logo Brand Fm.png', logoSize: 20),
-                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',
-                      logoSize: 20),
+                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',logoSize: 20),
                   brandLogo('Vindys', 'assets/Logo Brand Vs.png', logoSize: 20),
                 ],
               ),
             ),
 
-            // Product Grid Section
+            // Product Grid Section using Firebase Firestore
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: products.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  return productCard(
-                    products[index]['image'],
-                    products[index]['name'],
-                    products[index]['price'],
-                    products[index]['rating'],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('products').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('No products available.'));
+                  }
+
+                  final products = snapshot.data!.docs;
+                  return GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, index) {
+                      final productData = products[index].data() as Map<String, dynamic>;
+                      final imagePath = productData['image_url'] ?? 'assets/placeholder.png';
+                      
+                      return productCard(
+                        imagePath,
+                        productData['name'] ?? 'No Name',
+                        productData['price']?.toDouble() ?? 0.0,
+                        productData['size'] ?? 'N/A',
+                        productData['stock'] ?? 0,
+                      );
+                    },
                   );
                 },
               ),
@@ -217,51 +207,77 @@ class AllbrandView extends StatelessWidget {
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
-  ],
-),
+        ],
+      ),
     );
   }
 
-  // Helper to build product card with dynamic data
-  Widget productCard(
-      String imagePath, String name, String price, double rating) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to product detail page
-        if (name == 'Mr.Show 502 Sepatu Formal Kulit') {
-          Get.to(Brandms2View());
-        } else if (name == 'ForMen AF 104 Sepatu Loafers Kulit') {
-          Get.to(Brandfm2View());
-        } else if (name == 'Handymen 971 Sepatu Safety Pendek') {
-          Get.to(Brandhm2View());
-        } else if (name == 'Vindys Lawender 503 Sepatu Mid Heels') {
-          Get.to(Brandvindys2View());
-        }
-      },
-      child: Card(
+  // Mengambil data dari Firebase dan menampilkan card produk dengan data yang diminta
+  Widget productCard(String imagePath, String name, double price, String size, int stock) {
+  return GestureDetector(
+    onTap: () {
+      // Arahkan ke halaman detail produk (dengan kondisi lebih spesifik)
+      if (name == 'Mr. Show 501 Sepatu Formal Kulit') {
+        Get.to(Brandms1View());
+      } else if (name == 'Mr. Show 502 Sepatu Formal Kulit') {
+        Get.to(Brandms2View());
+      } else if (name == 'ForMen AF 101 Sepatu Loafers Kulit') {
+        Get.to(Brandfm1View());
+      } else if (name == 'ForMen AF 104 Sepatu Loafers Kulit') {
+        Get.to(Brandfm2View());
+      } else if (name == 'Handymen 204 Sepatu Formal Kulit') {
+        Get.to(Brandhm1View());
+      } else if (name == 'Handymen 971 Sepatu Safety Pendek') {
+        Get.to(Brandhm2View());
+      } else if (name == 'Vindys 502 Mid Heels Formal Shoes') {
+        Get.to(Brandvindys1View());
+      } else if (name == 'Vindys 503 Mid Heels Formal Shoes') {
+        Get.to(Brandvindys2View());
+      }
+    },
+    child: Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(imagePath, height: 100, width: 100),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Center(
+              child: Image.asset(
+                imagePath, // Menggunakan Image.asset karena path lokal
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
               ),
             ),
-            Text(price),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.star, color: Colors.yellow),
-                Text(rating.toString()),
-              ],
+            SizedBox(height: 8),
+            Text(
+              name,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              'Rp. ${price.toStringAsFixed(3)}',
+              style: TextStyle(fontSize: 14, color: Colors.brown),
+            ),
+            Text(
+              'Ukuran: $size',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            Text(
+              'Stok: $stock',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   // Helper to build brand banner
   Widget buildBanner(String title, String imagePath, String buttonText) {

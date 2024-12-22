@@ -1,5 +1,11 @@
 import 'package:get/get.dart';
 
+import '../modules/admin_faq/bindings/admin_faq_binding.dart';
+import '../modules/admin_faq/views/admin_faq_view.dart';
+import '../modules/admin_home/bindings/admin_home_binding.dart';
+import '../modules/admin_home/views/admin_home_view.dart';
+import '../modules/admin_produk/bindings/admin_produk_binding.dart';
+import '../modules/admin_produk/views/admin_produk_view.dart';
 import '../modules/alamat_saya/bindings/alamat_saya_binding.dart';
 import '../modules/alamat_saya/views/alamat_saya_view.dart';
 import '../modules/alamat_tagihan/bindings/alamat_tagihan_binding.dart';
@@ -66,6 +72,8 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
+import '../modules/user_faq/bindings/user_faq_binding.dart';
+import '../modules/user_faq/views/user_faq_view.dart';
 import '../modules/user_profil/bindings/user_profil_binding.dart';
 import '../modules/user_profil/views/user_profil_view.dart';
 import '../modules/welcome/bindings/welcome_binding.dart';
@@ -233,7 +241,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.KERANJANG,
-      page: () => const KeranjangView(),
+      page: () => KeranjangView(),
       binding: KeranjangBinding(),
     ),
     GetPage(
@@ -260,6 +268,26 @@ class AppPages {
       name: _Paths.ALAMAT_SAYA,
       page: () => const AlamatSayaView(),
       binding: AlamatSayaBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_HOME,
+      page: () => AdminHomeView(),
+      binding: AdminHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_PRODUK,
+      page: () => AdminProdukView(),
+      binding: AdminProdukBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_FAQ,
+      page: () => const AdminFaqView(),
+      binding: AdminFaqBinding(),
+    ),
+    GetPage(
+      name: _Paths.USER_FAQ,
+      page: () => const UserFaqView(),
+      binding: UserFaqBinding(),
     ),
   ];
 }

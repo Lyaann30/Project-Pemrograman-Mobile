@@ -6,6 +6,7 @@ import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/forgot_pw/views/forgot_pw_view.dart';
 import 'package:myapp/app/modules/keranjang/views/keranjang_view.dart';
 import 'package:myapp/app/modules/pencarian/views/pencarian_view.dart';
+import 'package:myapp/app/modules/user_faq/views/user_faq_view.dart';
 import 'package:myapp/app/modules/user_profil/views/user_profil_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 
@@ -152,7 +153,7 @@ class ProfileView extends StatelessWidget {
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     // Navigasi ke halaman FAQ
-                    // Get.to(() => FaqPage());
+                    Get.to(() => UserFaqView());
                   },
                 ),
                 Divider(),

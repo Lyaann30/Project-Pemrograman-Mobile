@@ -6,6 +6,7 @@ import 'package:myapp/app/modules/pencarian/views/pencarian_view.dart';
 import 'package:myapp/app/modules/keranjang/views/keranjang_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 import 'package:myapp/app/modules/profile/views/profile_view.dart';
+import 'package:myapp/app/controllers/auth_controller.dart'; // Pastikan untuk mengimpor AuthController
 
 class AlamatSayaView extends StatefulWidget {
   const AlamatSayaView({super.key});
@@ -15,29 +16,18 @@ class AlamatSayaView extends StatefulWidget {
 }
 
 class _AlamatSayaViewState extends State<AlamatSayaView> {
-  final CollectionReference addressesCollection =
-      FirebaseFirestore.instance.collection('addresses');
+  final AuthController _authController = Get.find<AuthController>(); // Mengakses AuthController
 
-  Future<void> addAddress(String name, String phone, String address) async {
-    await addressesCollection.add({
-      'name': name,
-      'phone': phone,
-      'address': address,
-      'label': 'Lainnya',
-    });
+  Future<void> saveAddress(String name, String phone, String address) async {
+    await _authController.saveAddress(name, phone, address); // Memanggil metode saveAddress
   }
 
-  Future<void> editAddress(
-      String docId, String name, String phone, String address) async {
-    await addressesCollection.doc(docId).update({
-      'name': name,
-      'phone': phone,
-      'address': address,
-    });
+  Future<void> editAddress(String docId, String name, String phone, String address) async {
+    await _authController.editAddress(docId, name, phone, address); // Menggunakan metode dari AuthController
   }
 
   Future<void> deleteAddress(String docId) async {
-    await addressesCollection.doc(docId).delete();
+    await _authController.deleteAddress(docId); // Menggunakan metode dari AuthController
   }
 
   void showAddressDialog({String? docId, Map<String, dynamic>? data}) {
@@ -78,11 +68,9 @@ class _AlamatSayaViewState extends State<AlamatSayaView> {
           ElevatedButton(
             onPressed: () {
               if (docId == null) {
-                addAddress(nameController.text, phoneController.text,
-                    addressController.text);
+                saveAddress(nameController.text, phoneController.text, addressController.text);
               } else {
-                editAddress(docId, nameController.text, phoneController.text,
-                    addressController.text);
+                editAddress(docId, nameController.text, phoneController.text, addressController.text);
               }
               Navigator.pop(context);
             },
@@ -108,19 +96,20 @@ class _AlamatSayaViewState extends State<AlamatSayaView> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: addressesCollection.snapshots(),
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: _authController.getAddresses(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final docs = snapshot.data!.docs;
+          final addresses = snapshot.data!;
+
           return ListView.builder(
-            itemCount: docs.length,
+            itemCount: addresses.length,
             itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
-              final docId = docs[index].id;
+              final data = addresses[index];
+              final docId = data['docId']; // Gantilah jika menggunakan ID dokumen untuk pengeditan
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -155,8 +144,7 @@ class _AlamatSayaViewState extends State<AlamatSayaView> {
                           const Spacer(),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.black),
-                            onPressed: () =>
-                                showAddressDialog(docId: docId, data: data),
+                            onPressed: () => showAddressDialog(docId: docId, data: data),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete,
@@ -206,10 +194,8 @@ class _AlamatSayaViewState extends State<AlamatSayaView> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart), label: 'Cart'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border), label: 'Wishlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Wishlist'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

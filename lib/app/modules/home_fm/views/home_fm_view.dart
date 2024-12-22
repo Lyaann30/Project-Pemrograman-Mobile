@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/brandfm1/views/brandfm1_view.dart';
 import 'package:myapp/app/modules/brandfm2/views/brandfm2_view.dart';
@@ -15,34 +16,6 @@ import 'package:myapp/app/modules/profile/views/profile_view.dart';
 import 'package:myapp/app/modules/wishlist/views/wishlist_view.dart';
 
 class HomeFmView extends StatelessWidget {
-  // List Produk
-  final List<Map<String, dynamic>> products = [
-    {
-      'image': 'assets/ForMen AF 101 Sepatu Loafers Kulit.png',
-      'name': 'ForMen AF 101 Sepatu Loafers Kulit',
-      'price': 'Rp. 301.175',
-      'rating': 5.0
-    },
-    {
-      'image': 'assets/ForMen AF 104 Sepatu Loafers Kulit.png',
-      'name': 'ForMen AF 104 Sepatu Loafers Kulit',
-      'price': 'Rp. 450.000',
-      'rating': 4.8
-    },
-    {
-      'image': 'assets/ForMen FM 01 Sepatu Casual Formal.png',
-      'name': 'ForMen FM 01 Sepatu Casual Formal',
-      'price': 'Rp. 357.750',
-      'rating': 5.0
-    },
-    {
-      'image': 'assets/ForMen FM 06 Sepatu Casual Formal.png',
-      'name': 'ForMen FM 06 Sepatu Casual Formal',
-      'price': 'Rp. 374.000',
-      'rating': 5.0
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,13 +35,12 @@ class HomeFmView extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(
-                right: 16.0), // Menambahkan padding di sebelah kanan
+            padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
               child: Icon(
                 Icons.account_circle,
                 color: Colors.purple,
-                size: 40, // Ukuran ikon lebih besar
+                size: 40,
               ),
             ),
           ),
@@ -109,7 +81,7 @@ class HomeFmView extends StatelessWidget {
               ),
             ),
 
-            // Teks "All Brands" di sebelah kiri
+            // Teks "Brand ForMen" di sebelah kiri
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -125,7 +97,7 @@ class HomeFmView extends StatelessWidget {
               ),
             ),
 
-            // Brand Logos Section
+             // Brand Logos Section
             Container(
               height: 80,
               child: ListView(
@@ -134,32 +106,51 @@ class HomeFmView extends StatelessWidget {
                   brandLogo('All', 'assets/Logo All Brand.png', logoSize: 20),
                   brandLogo('Hm', 'assets/Logo Brand Hm.png', logoSize: 20),
                   brandLogo('Fm', 'assets/Logo Brand Fm.png', logoSize: 20),
-                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',
-                      logoSize: 20),
+                  brandLogo('Mr.Show', 'assets/Logo Brand Ms.png',logoSize: 20),
                   brandLogo('Vindys', 'assets/Logo Brand Vs.png', logoSize: 20),
                 ],
               ),
             ),
 
-            // Product Grid Section
+            // Product Grid Section using Firebase Firestore
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: products.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  return productCard(
-                    products[index]['image'],
-                    products[index]['name'],
-                    products[index]['price'],
-                    products[index]['rating'],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('products')
+                    .where('brand', isEqualTo: 'Fm') // Filter berdasarkan merek
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('No products available.'));
+                  }
+
+                  final products = snapshot.data!.docs;
+                  return GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, index) {
+                      final productData = products[index].data() as Map<String, dynamic>;
+                      final imagePath = productData['image_url'] ?? 'assets/placeholder.png';
+                      
+                      return productCard(
+                        imagePath,
+                        productData['name'] ?? 'No Name',
+                        productData['price']?.toDouble() ?? 0.0,
+                        productData['size'] ?? 'N/A',
+                        productData['stock'] ?? 0,
+                      );
+                    },
                   );
                 },
               ),
@@ -170,9 +161,9 @@ class HomeFmView extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
-        backgroundColor: Color(0xFF8B4513), // Warna coklat
-        selectedItemColor: Colors.black54, // Warna item yang dipilih
-        unselectedItemColor: Colors.white, // Warna item yang tidak dipilih
+        backgroundColor: Color(0xFF8B4513),
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.white,
         onTap: (index) {
           // Handle navigation on tap
           switch (index) {
@@ -214,43 +205,59 @@ class HomeFmView extends StatelessWidget {
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
-  ],
-),
+        ],
+      ),
     );
   }
 
-  // Helper to build product card with dynamic data
-  Widget productCard(
-      String imagePath, String name, String price, double rating) {
+  // Helper to build product card
+  Widget productCard(String imagePath, String name, double price, String size, int stock) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product detail page
+        // Arahkan ke halaman detail produk (sesuaikan dengan rute halaman yang diinginkan)
         if (name == 'ForMen AF 101 Sepatu Loafers Kulit') {
-          Get.to(Brandfm1View());
-        } else if (name == 'ForMen AF 104 Sepatu Loafers Kulit') {
-          Get.to(Brandfm2View());
-        } 
+        Get.to(Brandfm1View());
+      } else if (name == 'ForMen AF 104 Sepatu Loafers Kulit') {
+        Get.to(Brandfm2View());
+      }
       },
       child: Card(
-        child: Column(
-          children: [
-            Image.asset(imagePath, height: 100, width: 100),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  imagePath,
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            Text(price),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.star, color: Colors.yellow),
-                Text(rating.toString()),
-              ],
-            ),
-          ],
+              SizedBox(height: 8),
+              Text(
+                name,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Rp. ${price.toStringAsFixed(3)}',
+                style: TextStyle(fontSize: 14, color: Colors.brown),
+              ),
+              Text(
+                'Ukuran: $size',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              Text(
+                'Stok: $stock',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -334,5 +341,4 @@ class HomeFmView extends StatelessWidget {
     ),
   );
 }
-
 }

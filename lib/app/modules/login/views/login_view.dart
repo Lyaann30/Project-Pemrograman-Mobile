@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
-import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/register/views/register_view.dart';
 
 class LoginView extends StatelessWidget {
@@ -88,21 +87,23 @@ class LoginView extends StatelessWidget {
                                 passwordController.text,
                               );
 
-                              if (success) {
-                                Get.to(() => AllbrandView());
+                              // Jika login berhasil, sudah diarahkan di dalam authController
+                              if (!success) {
+                                // Tampilkan pesan kesalahan jika login gagal
+                                Get.snackbar('Login Failed', 'Please check your credentials');
                               }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF8B4513),
                               foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 140, vertical: 15),
+                              padding: EdgeInsets.symmetric(horizontal: 140, vertical: 15),
                             ),
                             child: Text(
                               'Login',
                               style: TextStyle(fontSize: 18),
                             ),
                           ),
+
 
                           // Link Register Now
                           Row(

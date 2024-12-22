@@ -39,6 +39,10 @@ abstract class Routes {
   static const PESANAN_SUKSES = _Paths.PESANAN_SUKSES;
   static const USER_PROFIL = _Paths.USER_PROFIL;
   static const ALAMAT_SAYA = _Paths.ALAMAT_SAYA;
+  static const ADMIN_HOME = _Paths.ADMIN_HOME;
+  static const ADMIN_PRODUK = _Paths.ADMIN_PRODUK;
+  static const ADMIN_FAQ = _Paths.ADMIN_FAQ;
+  static const USER_FAQ = _Paths.USER_FAQ;
 }
 
 abstract class _Paths {
@@ -79,4 +83,8 @@ abstract class _Paths {
   static const PESANAN_SUKSES = '/pesanan-sukses';
   static const USER_PROFIL = '/user-profil';
   static const ALAMAT_SAYA = '/alamat-saya';
+  static const ADMIN_HOME = '/admin-home';
+  static const ADMIN_PRODUK = '/admin-produk';
+  static const ADMIN_FAQ = '/admin-faq';
+  static const USER_FAQ = '/user-faq';
 }
