@@ -125,6 +125,7 @@ class AllbrandView extends StatelessWidget {
                 ),
               ),
             ),
+            
             // Teks "All Brands" di sebelah kiri
             Align(
               alignment: Alignment.centerLeft,
