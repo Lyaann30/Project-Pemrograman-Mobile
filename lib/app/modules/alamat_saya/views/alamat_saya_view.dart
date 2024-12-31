@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/allbrand/views/allbrand_view.dart';
 import 'package:myapp/app/modules/pencarian/views/pencarian_view.dart';
 import 'package:myapp/app/modules/keranjang/views/keranjang_view.dart';

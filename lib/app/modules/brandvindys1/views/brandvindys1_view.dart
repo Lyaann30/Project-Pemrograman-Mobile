@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
-import 'package:myapp/app/modules/alamat_tagihan/views/alamat_tagihan_view.dart';
 import 'package:myapp/app/modules/keranjang_vd1/views/keranjang_vd1_view.dart';
 
 class Brandvindys1View extends StatefulWidget {
