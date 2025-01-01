@@ -1,0 +1,41 @@
+name: myapp
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  get: ^4.6.6
+  image_picker: ^1.1.2
+  firebase_auth: ^4.17.8
+  cloud_firestore: ^4.15.8
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/LOGO_YUMANSA.png
+    - assets/kamar1.jpg
+    - assets/kamar2.jpg
+    - assets/kamar3.jpg
+    - assets/kamar4.jpg
+    - assets/dapur1.jpg
+    - assets/dapur2.jpg
+    - assets/dapur3.jpg
+    - assets/dapur4.jpg
+    - assets/interior1.png
+    - assets/interior2.png
+    - assets/interior3.png
+    - assets/interior4.png

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "206038299834",
+    "project_id": "ysi-project-9f10a",
+    "storage_bucket": "ysi-project-9f10a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:206038299834:android:a2236df74dc3e64e4c7e83",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-PTeTHeUNVfCa1WxMyeiRlvmHjwpqTB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
